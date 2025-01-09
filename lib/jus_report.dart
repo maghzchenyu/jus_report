@@ -122,17 +122,6 @@ class JusReport {
   /// 异步初始化
   _asyncInit() async {
 
-    try {
-      final simCardInfoPlugin = SimCardInfo();
-      simCardInfoPlugin.getSimInfo().then( (simInfos) => {
-        if (simInfos != null) {
-          if (simInfos.isNotEmpty) {
-            _publicData.telecomOper = simInfos[0].carrierName
-          }
-        }});
-    }catch (e) {
-      debugPrint('get sim info error : $e');
-    }
     /* 需要授权
     final simCardInfoPlugin = SimCardInfo();
     try {
