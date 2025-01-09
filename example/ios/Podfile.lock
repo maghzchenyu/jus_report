@@ -1,0 +1,108 @@
+PODS:
+  - advertising_id (0.0.1):
+    - Flutter
+  - aliyun_log_dart_sdk (1.1.2):
+    - AliyunLogProducer (= 4.3.11)
+    - Flutter
+  - AliyunLogProducer (4.3.11)
+  - connection_network_type (0.0.1):
+    - Flutter
+    - ReachabilitySwift
+  - device_info_plus (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - integration_test (0.0.1):
+    - Flutter
+  - jus_report (0.0.1):
+    - Flutter
+  - network_info_plus (0.0.1):
+    - Flutter
+  - package_info (0.0.1):
+    - Flutter
+  - path_provider_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - permission_handler_apple (9.3.0):
+    - Flutter
+  - ReachabilitySwift (5.2.4)
+  - shared_preferences_foundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - sim_card_info (0.0.1):
+    - Flutter
+  - sim_plugin (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - advertising_id (from `.symlinks/plugins/advertising_id/ios`)
+  - aliyun_log_dart_sdk (from `.symlinks/plugins/aliyun_log_dart_sdk/ios`)
+  - connection_network_type (from `.symlinks/plugins/connection_network_type/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
+  - Flutter (from `Flutter`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - jus_report (from `.symlinks/plugins/jus_report/ios`)
+  - network_info_plus (from `.symlinks/plugins/network_info_plus/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
+  - sim_card_info (from `.symlinks/plugins/sim_card_info/ios`)
+  - sim_plugin (from `.symlinks/plugins/sim_plugin/ios`)
+
+SPEC REPOS:
+  https://gitee.com/aliyun-sls/Specs.git:
+    - AliyunLogProducer
+  https://github.com/CocoaPods/Specs.git:
+    - ReachabilitySwift
+
+EXTERNAL SOURCES:
+  advertising_id:
+    :path: ".symlinks/plugins/advertising_id/ios"
+  aliyun_log_dart_sdk:
+    :path: ".symlinks/plugins/aliyun_log_dart_sdk/ios"
+  connection_network_type:
+    :path: ".symlinks/plugins/connection_network_type/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
+  Flutter:
+    :path: Flutter
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+  jus_report:
+    :path: ".symlinks/plugins/jus_report/ios"
+  network_info_plus:
+    :path: ".symlinks/plugins/network_info_plus/ios"
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
+  sim_card_info:
+    :path: ".symlinks/plugins/sim_card_info/ios"
+  sim_plugin:
+    :path: ".symlinks/plugins/sim_plugin/ios"
+
+SPEC CHECKSUMS:
+  advertising_id: ea8a9b898196a0673bad1b0fe6c50541d9295d02
+  aliyun_log_dart_sdk: bbd4df717e64ad0c5be68b6a38884706616d28b4
+  AliyunLogProducer: c43fd8ef61ed54fb0e2ce1e58722cec893fea60a
+  connection_network_type: 160e62717f4cfc913811aa4e4ccf7f4e60497936
+  device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  integration_test: 252f60fa39af5e17c3aa9899d35d908a0721b573
+  jus_report: 94e12375952a7b9cda21ace97d4c2d6a399f969f
+  network_info_plus: 6d0c3eb8367b8164fa3fb0c19875e3f59d49697f
+  package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  ReachabilitySwift: 32793e867593cfc1177f5d16491e3a197d2fccda
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  sim_card_info: 4b5aa5d5f4633b5b439caf29d295e17f3aa9795d
+  sim_plugin: e88d5179b478328762f61a99bab570a545e98cd8
+
+PODFILE CHECKSUM: be1890fdc68730af723b24bf9cc5449e27b44e88
+
+COCOAPODS: 1.16.2

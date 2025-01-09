@@ -2,6 +2,13 @@
 # platform :ios, '12.0'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
+
+# # 请勿遗漏Master仓库。
+source 'https://github.com/CocoaPods/Specs.git'
+source 'https://github.com/aliyun-sls/Specs.git'
+# 中国内地仓库，必须添加
+source 'https://gitee.com/aliyun-sls/Specs.git'
+
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {

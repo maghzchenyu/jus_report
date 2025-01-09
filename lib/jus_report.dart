@@ -37,8 +37,15 @@ class JusReport {
     return JusReportPlatform.instance.getPlatformVersion();
   }
 
-  /// 初始化
+  /// 初始化(可选字段除了forceInit，其他都是全局字段需要，如果初始化时无法获取，可在后去能够
+  /// 获取到的时候通过getPublicData再设置)
   /// [forceInit] 是否强制初始化
+  /// [googleID] 谷歌ID
+  /// [platID] 平台ID
+  /// [userID] 用户ID
+  /// [systemLang] 系统语言
+  /// [countryCode] 国家代码
+  /// [premiumStatus] 会员订阅状态
   setupJusReport(
       {bool forceInit = false,
         String? googleID,
@@ -88,6 +95,7 @@ class JusReport {
       }
     } else if (Platform.isIOS) {
       _publicData.deviceID = (await deviceInfo.iosInfo).identifierForVendor;
+      _publicData.IDFV = _publicData.deviceID;
     }
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _publicData.appName = packageInfo.appName;
@@ -114,6 +122,17 @@ class JusReport {
   /// 异步初始化
   _asyncInit() async {
 
+    try {
+      final simCardInfoPlugin = SimCardInfo();
+      simCardInfoPlugin.getSimInfo().then( (simInfos) => {
+        if (simInfos != null) {
+          if (simInfos.isNotEmpty) {
+            _publicData.telecomOper = simInfos[0].carrierName
+          }
+        }});
+    }catch (e) {
+      debugPrint('get sim info error : $e');
+    }
     /* 需要授权
     final simCardInfoPlugin = SimCardInfo();
     try {
@@ -175,7 +194,7 @@ class JusReport {
     return _publicData;
   }
 
-  /// 从外部设置公共配置对象(通常的使用逻辑是通过getPublicData获取内部，再根据需求做修改设置回SDK内部)
+  /// 从外部设置公共配置对象，会覆盖内部对象
   /// [publicData] 公共数据配置对象
   setPublicData(ReportPublicData publicData) {
     _publicData = publicData;
