@@ -10,8 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sim_card_info/sim_card_info.dart';
-import 'package:sim_card_info/sim_info.dart';
+import 'package:sim_plugin/sim_plugin.dart';
 import 'package:uuid/uuid.dart';
 
 import 'jus_report_platform_interface.dart';
@@ -64,8 +63,7 @@ class JusReport {
     }
     _isInit = true;
     _setupAliLogSDK(endpoint, project, logstore, accessKeyId, accessKeySecret);
-    _syncInit();
-    _asyncInit();
+    _initGlobalReportData();
     _dynamicListen();
     _publicData.googleID = googleID;
     _publicData.platID = platID;
@@ -74,8 +72,8 @@ class JusReport {
     _publicData.countryCode = countryCode;
   }
 
-  /// 可以同步初始化部分
-  _syncInit() async {
+  /// 初始化埋点全局数据
+  _initGlobalReportData() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     _publicData.progressID = _getUUID();
     _publicData.sessionID = _getUUID();
@@ -117,24 +115,24 @@ class JusReport {
 
     NetworkStatus networkStatus = await ConnectionNetworkType().currentNetworkStatus();
     _publicData.network = _getNetworkStatusName(networkStatus);
+
+    _getTelecomOper();
   }
 
-  /// 异步初始化
-  _asyncInit() async {
-
-    /* 需要授权
-    final simCardInfoPlugin = SimCardInfo();
+  /// 获取运营商
+  _getTelecomOper() async {
     try {
-      simCardInfoPlugin.getSimInfo().then( (simInfos) => {
-      if (simInfos != null) {
-          if (simInfos.isNotEmpty) {
-        _publicData.telecomOper = simInfos[0].carrierName
+      final simPlugin = SimPlugin();
+      final simSupportedIsOK = await simPlugin.simSupportedIsOK();
+      final currentCarrierName = await simPlugin.getCurrentCarrierName();
+      if (Platform.isAndroid) {
+        _publicData.telecomOper = currentCarrierName;
+      } else if (Platform.isIOS && simSupportedIsOK) {
+        _publicData.telecomOper = currentCarrierName;
       }
-    }});
-    }catch (e) {
-      debugPrint('get sim info error : $e');
-    } */
-
+    } catch (e) {
+      debugPrint(e.toString());
+    }
   }
 
   /// 监听一些可能全局变更的数据
