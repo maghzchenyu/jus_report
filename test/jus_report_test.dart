@@ -20,7 +20,7 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    JusReport jusReportPlugin = JusReport();
+    JSReport jusReportPlugin = JSReport();
     MockJusReportPlatform fakePlatform = MockJusReportPlatform();
     JusReportPlatform.instance = fakePlatform;
   });

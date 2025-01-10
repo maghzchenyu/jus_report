@@ -61,7 +61,7 @@ class JSReport {
   /// [value] 属性值
   setUserProperty({
     required String name,
-    required String? value,
+    required dynamic? value,
   }) {
     _userProperty[name] = value;
   }
