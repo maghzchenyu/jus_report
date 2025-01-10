@@ -16,7 +16,7 @@ import 'jus_report_platform_interface.dart';
 class JusReport {
   static JusReport? _instance;
   static const _androidIdPlugin = AndroidId();
-  ReportPublicData _publicData = ReportPublicData();
+  final ReportPublicData _publicData = ReportPublicData();
   AliyunLogDartSdk? _aliyunLogSdk;
   final String _deviceIdKey = "jus_device_id";
   late final AppLifecycleListener _appLifecycleListener;
