@@ -202,6 +202,7 @@ class JusReport {
         DateTime.now().millisecondsSinceEpoch;
     reportMap[_ReportJsonKey.timeZone.name] = DateTime.now().timeZoneName;
     LogProducerResult code = await _aliyunLogSdk!.addLog(reportMap);
+    print('report event json: ${reportMap.toString()}');
   }
 
   /// 获取网络状态名称
