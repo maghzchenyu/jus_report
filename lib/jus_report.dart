@@ -8,7 +8,6 @@ import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sim_plugin/sim_plugin.dart';
 import 'package:uuid/uuid.dart';
 
@@ -17,7 +16,6 @@ class JusReport {
   static const _androidIdPlugin = AndroidId();
   final _publicData = _ReportPublicData();
   AliyunLogDartSdk? _aliyunLogSdk;
-  final String _deviceIdKey = "jus_device_id";
   late final AppLifecycleListener _appLifecycleListener;
 
   factory JusReport() {
@@ -77,6 +75,7 @@ class JusReport {
     String? systemLang,
     String? countryCode,
     String? platID,
+    String? deviceID,
   }) {
     if (systemLang != null) {
       _publicData.systemLang = systemLang;
@@ -86,6 +85,9 @@ class JusReport {
     }
     if (platID != null) {
       _publicData.platID = platID;
+    }
+    if (deviceID!= null) {
+      _publicData.deviceID = deviceID;
     }
   }
 
@@ -102,20 +104,8 @@ class JusReport {
     _publicData.sessionID = _getUUID();
     if (Platform.isAndroid) {
       _publicData.androidID = await _androidIdPlugin.getId();
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      if (_publicData.androidID != null) {
-        _publicData.deviceID = _publicData.androidID;
-      } else {
-        _publicData.deviceID = prefs.getString(_deviceIdKey);
-        if (_publicData.deviceID == null) {
-          String deviceId = _getUUID();
-          _publicData.deviceID = deviceId;
-          prefs.setString(_deviceIdKey, deviceId);
-        }
-      }
     } else if (Platform.isIOS) {
-      _publicData.deviceID = (await deviceInfo.iosInfo).identifierForVendor;
-      _publicData.IDFV = _publicData.deviceID;
+      _publicData.IDFV = (await deviceInfo.iosInfo).identifierForVendor;
     }
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _publicData.appName = packageInfo.appName;
