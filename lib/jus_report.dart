@@ -20,7 +20,6 @@ class JusReport {
   static const _androidIdPlugin = AndroidId();
   ReportPublicData _publicData = ReportPublicData();
   AliyunLogDartSdk? _aliyunLogSdk;
-  bool _isInit = false;
   final String _deviceIdKey = "jus_device_id";
 
   late final AppLifecycleListener _appLifecycleListener;
@@ -36,40 +35,64 @@ class JusReport {
     return JusReportPlatform.instance.getPlatformVersion();
   }
 
-  /// 初始化(可选字段除了forceInit，其他都是全局字段需要，如果初始化时无法获取，可在后去能够
-  /// 获取到的时候通过getPublicData再设置)
-  /// [forceInit] 是否强制初始化
-  /// [googleID] 谷歌ID
-  /// [platID] 平台ID
-  /// [userID] 用户ID
-  /// [systemLang] 系统语言
-  /// [countryCode] 国家代码
-  /// [premiumStatus] 会员订阅状态
+  /// 初始化
+  /// [endpoint] 日志服务地址
+  /// [project] 日志服务项目
+  /// [logstore] 日志服务日志库
+  /// [accessKeyId] 日志服务AccessKeyId
+  /// [accessKeySecret] 日志服务AccessKeySecret
   setupJusReport(
-      {bool forceInit = false,
-        String? googleID,
-        String? platID,
-        String? userID,
-        String? systemLang,
-        String? countryCode,
-        int? premiumStatus,
-        required String endpoint,
-        required String project,
-        required String logstore,
-        required String accessKeyId,
-        required String accessKeySecret}) {
-    if (_isInit && !forceInit) {
-      return;
-    }
-    _isInit = true;
+      {required String endpoint,
+      required String project,
+      required String logstore,
+      required String accessKeyId,
+      required String accessKeySecret}) {
     _setupAliLogSDK(endpoint, project, logstore, accessKeyId, accessKeySecret);
     _initGlobalReportData();
     _dynamicListen();
-    _publicData.googleID = googleID;
-    _publicData.platID = platID;
-    _publicData.userID = userID;
-    _publicData.systemLang = systemLang;
-    _publicData.countryCode = countryCode;
+  }
+
+  /// 设置账号相关数据
+  /// [googleID] 谷歌ID
+  /// [userID] 用户ID
+  setAccountPublicData({String? googleID, String? userID}) {
+    if (googleID != null) {
+      _publicData.googleID = googleID;
+    }
+    if (userID != null) {
+      _publicData.userID = userID;
+    }
+  }
+
+  /// 设置公共数据
+  /// [systemLang] 系统语言
+  /// [countryCode] 国家代码
+  /// [premiumStatus] 会员订阅状态
+  /// [platID] 平台ID
+  setCommonPublicData({
+    String? systemLang,
+    String? countryCode,
+    int? premiumStatus,
+    String? platID,
+  }) {
+    if (systemLang != null) {
+      _publicData.systemLang = systemLang;
+    }
+    if (countryCode != null) {
+      _publicData.countryCode = countryCode;
+    }
+    if (premiumStatus != null) {
+      _publicData.premiumStatus = premiumStatus;
+    }
+    if (platID != null) {
+      _publicData.platID = platID;
+    }
+  }
+
+  /// 清除账号相关数据
+  clearAccountPublicData() {
+    _publicData.googleID = null;
+    _publicData.userID = null;
   }
 
   /// 初始化埋点全局数据
@@ -113,9 +136,9 @@ class JusReport {
       _publicData.IDFA = await AdvertisingId.id(true);
     }
 
-    NetworkStatus networkStatus = await ConnectionNetworkType().currentNetworkStatus();
+    NetworkStatus networkStatus =
+        await ConnectionNetworkType().currentNetworkStatus();
     _publicData.network = _getNetworkStatusName(networkStatus);
-
     _getTelecomOper();
   }
 
@@ -136,8 +159,9 @@ class JusReport {
   }
 
   /// 监听一些可能全局变更的数据
-  _dynamicListen(){
-    ConnectionNetworkType().onNetworkStateChanged
+  _dynamicListen() {
+    ConnectionNetworkType()
+        .onNetworkStateChanged
         .listen((NetworkStatus networkStatus) {
       _publicData.network = _getNetworkStatusName(networkStatus);
     });
@@ -148,7 +172,7 @@ class JusReport {
   }
 
   /// 进入后台回调
-  _onHide(){
+  _onHide() {
     _publicData.sessionID = _getUUID();
   }
 
@@ -165,6 +189,7 @@ class JusReport {
     configuration.persistentMaxFileCount = 20;
     _aliyunLogSdk = AliyunLogDartSdk();
     LogProducerResult result = await _aliyunLogSdk!.initProducer(configuration);
+    _aliyunLogSdk?.addTag("tag_key", "tag_value");
     print('init aliyun log sdk result: $result');
   }
 
@@ -186,7 +211,7 @@ class JusReport {
   setPublicData(ReportPublicData publicData) {
     _publicData = publicData;
   }
-  
+
   /// 上报事件
   /// [eventID] 事件ID
   /// [reportData] 上报数据
@@ -198,7 +223,8 @@ class JusReport {
     reportMap[_ReportJsonKey.requestID.name] = _getUUID();
     reportMap[_ReportJsonKey.eventID.name] = eventID;
     reportMap[_ReportJsonKey.eventTime.name] = DateTime.now().toString();
-    reportMap[_ReportJsonKey.eventTimeStamp.name] = DateTime.now().millisecondsSinceEpoch;
+    reportMap[_ReportJsonKey.eventTimeStamp.name] =
+        DateTime.now().millisecondsSinceEpoch;
     reportMap[_ReportJsonKey.timeZone.name] = DateTime.now().timeZoneName;
     LogProducerResult code = await _aliyunLogSdk!.addLog(reportMap);
     debugPrint('report event json: ${reportMap.toString()}');
@@ -208,7 +234,7 @@ class JusReport {
   /// 获取网络状态名称
   /// [networkStatus] 网络状态
   _getNetworkStatusName(NetworkStatus networkStatus) {
-    switch(networkStatus) {
+    switch (networkStatus) {
       case NetworkStatus.unreachable:
         return "none";
       case NetworkStatus.wifi:
@@ -277,7 +303,6 @@ class ReportPublicData {
     map[_ReportJsonKey.countryCode.name] = countryCode;
     map[_ReportJsonKey.premiumStatus.name] = premiumStatus;
     return map;
-
   }
 }
 
