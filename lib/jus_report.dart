@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:advertising_id/advertising_id.dart';
@@ -12,7 +11,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sim_plugin/sim_plugin.dart';
 import 'package:uuid/uuid.dart';
-
 import 'jus_report_platform_interface.dart';
 
 class JusReport {
@@ -21,7 +19,6 @@ class JusReport {
   ReportPublicData _publicData = ReportPublicData();
   AliyunLogDartSdk? _aliyunLogSdk;
   final String _deviceIdKey = "jus_device_id";
-
   late final AppLifecycleListener _appLifecycleListener;
 
   factory JusReport() {
@@ -46,9 +43,10 @@ class JusReport {
       required String project,
       required String logstore,
       required String accessKeyId,
-      required String accessKeySecret}) {
-    _setupAliLogSDK(endpoint, project, logstore, accessKeyId, accessKeySecret);
-    _initGlobalReportData();
+      required String accessKeySecret}) async {
+    await _setupAliLogSDK(
+        endpoint, project, logstore, accessKeyId, accessKeySecret);
+    await _initGlobalReportData();
     _dynamicListen();
   }
 
@@ -189,7 +187,6 @@ class JusReport {
     configuration.persistentMaxFileCount = 20;
     _aliyunLogSdk = AliyunLogDartSdk();
     LogProducerResult result = await _aliyunLogSdk!.initProducer(configuration);
-    _aliyunLogSdk?.addTag("tag_key", "tag_value");
     print('init aliyun log sdk result: $result');
   }
 
@@ -198,18 +195,6 @@ class JusReport {
     final uuidGenerator = Uuid();
     final uniqueIdV4 = uuidGenerator.v4();
     return uniqueIdV4;
-  }
-
-  /// 获取公共数据配置对象
-  /// [publicData] 公共数据配置对象
-  getPublicData() {
-    return _publicData;
-  }
-
-  /// 从外部设置公共配置对象，会覆盖内部对象
-  /// [publicData] 公共数据配置对象
-  setPublicData(ReportPublicData publicData) {
-    _publicData = publicData;
   }
 
   /// 上报事件
@@ -227,8 +212,6 @@ class JusReport {
         DateTime.now().millisecondsSinceEpoch;
     reportMap[_ReportJsonKey.timeZone.name] = DateTime.now().timeZoneName;
     LogProducerResult code = await _aliyunLogSdk!.addLog(reportMap);
-    debugPrint('report event json: ${reportMap.toString()}');
-    print('report event result: $code');
   }
 
   /// 获取网络状态名称
