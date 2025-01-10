@@ -11,12 +11,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sim_plugin/sim_plugin.dart';
 import 'package:uuid/uuid.dart';
-import 'jus_report_platform_interface.dart';
 
 class JusReport {
   static JusReport? _instance;
   static const _androidIdPlugin = AndroidId();
-  final ReportPublicData _publicData = ReportPublicData();
+  final _publicData = _ReportPublicData();
   AliyunLogDartSdk? _aliyunLogSdk;
   final String _deviceIdKey = "jus_device_id";
   late final AppLifecycleListener _appLifecycleListener;
@@ -27,10 +26,6 @@ class JusReport {
   }
 
   JusReport._internal() {}
-
-  Future<String?> getPlatformVersion() {
-    return JusReportPlatform.instance.getPlatformVersion();
-  }
 
   /// 初始化
   /// [endpoint] 日志服务地址
@@ -53,24 +48,34 @@ class JusReport {
   /// 设置账号相关数据
   /// [googleID] 谷歌ID
   /// [userID] 用户ID
-  setAccountPublicData({String? googleID, String? userID}) {
+  /// [premiumStatus] 会员订阅状态
+  /// [creditInventory] 积分
+  setAccountPublicData(
+      {String? googleID,
+      String? userID,
+      int? premiumStatus,
+      int? creditInventory}) {
     if (googleID != null) {
       _publicData.googleID = googleID;
     }
     if (userID != null) {
       _publicData.userID = userID;
     }
+    if (premiumStatus != null) {
+      _publicData.premiumStatus = premiumStatus;
+    }
+    if (creditInventory != null) {
+      _publicData.creditInventory = creditInventory;
+    }
   }
 
   /// 设置公共数据
   /// [systemLang] 系统语言
   /// [countryCode] 国家代码
-  /// [premiumStatus] 会员订阅状态
   /// [platID] 平台ID
   setCommonPublicData({
     String? systemLang,
     String? countryCode,
-    int? premiumStatus,
     String? platID,
   }) {
     if (systemLang != null) {
@@ -78,9 +83,6 @@ class JusReport {
     }
     if (countryCode != null) {
       _publicData.countryCode = countryCode;
-    }
-    if (premiumStatus != null) {
-      _publicData.premiumStatus = premiumStatus;
     }
     if (platID != null) {
       _publicData.platID = platID;
@@ -98,7 +100,6 @@ class JusReport {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     _publicData.progressID = _getUUID();
     _publicData.sessionID = _getUUID();
-
     if (Platform.isAndroid) {
       _publicData.androidID = await _androidIdPlugin.getId();
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -133,7 +134,6 @@ class JusReport {
       _publicData.isEmulator = !(await deviceInfo.iosInfo).isPhysicalDevice;
       _publicData.IDFA = await AdvertisingId.id(true);
     }
-
     NetworkStatus networkStatus =
         await ConnectionNetworkType().currentNetworkStatus();
     _publicData.network = _getNetworkStatusName(networkStatus);
@@ -236,7 +236,7 @@ class JusReport {
   }
 }
 
-class ReportPublicData {
+class _ReportPublicData {
   String? progressID;
   String? sessionID;
   String? IDFA;
@@ -260,6 +260,7 @@ class ReportPublicData {
   String? deviceID;
   String? countryCode;
   int? premiumStatus;
+  int? creditInventory;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
@@ -285,6 +286,7 @@ class ReportPublicData {
     map[_ReportJsonKey.deviceID.name] = deviceID;
     map[_ReportJsonKey.countryCode.name] = countryCode;
     map[_ReportJsonKey.premiumStatus.name] = premiumStatus;
+    map[_ReportJsonKey.creditInventory.name] = creditInventory;
     return map;
   }
 }
@@ -319,5 +321,6 @@ enum _ReportJsonKey {
   systemLang,
   isEmulator,
   appName,
-  systemVersion
+  systemVersion,
+  creditInventory
 }

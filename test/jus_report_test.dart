@@ -23,7 +23,5 @@ void main() {
     JusReport jusReportPlugin = JusReport();
     MockJusReportPlatform fakePlatform = MockJusReportPlatform();
     JusReportPlatform.instance = fakePlatform;
-
-    expect(await jusReportPlugin.getPlatformVersion(), '42');
   });
 }
