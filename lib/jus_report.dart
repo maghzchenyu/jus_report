@@ -165,9 +165,8 @@ class JSReport {
   }
 
   /// 上报事件
-  /// [eventID] 事件ID
   /// [reportData] 上报数据
-  logEvent(String eventID, Map<String, dynamic> reportData) async {
+  logEvent(Map<String, dynamic> reportData) async {
     Map<String, dynamic> reportMap = _publicData.toJson();
     reportData.forEach((key, value) {
       reportMap[key] = value;
@@ -178,8 +177,7 @@ class JSReport {
     DateTime dateTime = DateTime.now();
     DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
     String formatted = formatter.format(dateTime);
-    reportMap[_ReportJsonKey.requestID.name] = _getUUID();
-    reportMap[_ReportJsonKey.eventID.name] = eventID;
+    reportMap[_ReportJsonKey.eventID.name] =  _getUUID();
     reportMap[_ReportJsonKey.eventTime.name] = formatted;
     reportMap[_ReportJsonKey.eventTimeStamp.name] =
         dateTime.millisecondsSinceEpoch;
@@ -283,7 +281,6 @@ class _ReportPublicData {
 }
 
 enum _ReportJsonKey {
-  requestID,
   eventID,
   systemDeviceType,
   processID,
