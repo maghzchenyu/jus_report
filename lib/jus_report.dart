@@ -67,10 +67,21 @@ class JSReport {
     _userProperty[name] = value;
   }
 
+  /// 设置用户全局属性
+  /// [properties] 属性集合
+  serUserProperties(Map<String, dynamic> properties) {
+    _userProperty.addAll(properties);
+  }
+
   /// 移除用户全局属性
   /// [name] 属性名
   removeUserProperty(String name) {
     _userProperty.remove(name);
+  }
+
+  /// 移除所有用户全局属性
+  removeAllUserProperty() {
+    _userProperty.clear();
   }
 
   /// 初始化埋点全局数据
