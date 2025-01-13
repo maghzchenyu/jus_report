@@ -211,28 +211,46 @@ class JSReport {
 }
 
 class _ReportPublicData {
+  /// 用户ID
   String? userID;
-
+  /// 进程ID
   String? processID;
+  /// AndroidID
   String? androidID;
-  String? proID;
+  /// 会话ID，一次完成的前台生命周期
   String? sessionID;
+  /// iOS 广告ID
   String? IDFA;
+  /// iOS 设备ID
   String? IDFV;
+  /// FirebaseID
   String? firebaseID;
+  /// 应用名
   String? appName;
+  /// 平台ID
   String? platID;
+  /// 包名
   String? packageName;
+  /// 客户端版本
   String? clientVersion;
+  /// 运营商
   String? telecomOper;
+  /// 系统类型
   String? systemType;
+  /// 系统版本
   String? systemVersion;
+  /// 系统设备类型
   String? systemDeviceType;
+  /// 网络类型
   String? network;
-  int? proxy;
+  // int? proxy;
+  /// 系统语言
   String? systemLang;
+  /// 是否模拟器
   bool? isEmulator;
+  /// 设备唯一标识
   String? deviceID;
+  /// 国家码
   String? countryCode;
 
   Map<String, dynamic> toJson() {
