@@ -24,7 +24,7 @@ dependencies:
   device_info_plus: ^10.1.2
   package_info: ^2.0.2
   connection_network_type: ^0.0.1
-  
+  intl: ^0.17.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

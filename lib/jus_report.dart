@@ -6,6 +6,7 @@ import 'package:android_id/android_id.dart';
 import 'package:connection_network_type/connection_network_type.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:intl/intl.dart';
 import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sim_plugin/sim_plugin.dart';
@@ -175,15 +176,17 @@ class JSReport {
       reportMap[key] = value;
     });
     DateTime dateTime = DateTime.now();
+    DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
+    String formatted = formatter.format(dateTime);
     reportMap[_ReportJsonKey.requestID.name] = _getUUID();
     reportMap[_ReportJsonKey.eventID.name] = eventID;
-    reportMap[_ReportJsonKey.eventTime.name] = dateTime.toString();
+    reportMap[_ReportJsonKey.eventTime.name] = formatted;
     reportMap[_ReportJsonKey.eventTimeStamp.name] =
         dateTime.millisecondsSinceEpoch;
     reportMap[_ReportJsonKey.timeZone.name] = dateTime.timeZoneName;
     LogProducerResult code = await _aliyunLogSdk!.addLog(reportMap);
     if (_isDebug) {
-      print('aliyun log add log data: ${code.toString()}');
+      print('aliyun log add log data: ${reportMap.toString()}');
       print('aliyun log add log result code: $code');
     }
   }
