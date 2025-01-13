@@ -84,6 +84,12 @@ class JSReport {
     _userProperty.clear();
   }
 
+  /// 设置context，之后在插件内部获取一些需要context获取的数据
+  /// [context] context
+  setContext(BuildContext context) {
+    _publicData.systemLang = Localizations.localeOf(context).languageCode;
+  }
+
   /// 初始化埋点全局数据
   _initGlobalReportData() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
