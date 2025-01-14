@@ -4,6 +4,7 @@ import 'package:advertising_id/advertising_id.dart';
 import 'package:aliyun_log_dart_sdk/aliyun_log_dart_sdk.dart';
 import 'package:android_id/android_id.dart';
 import 'package:connection_network_type/connection_network_type.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
@@ -11,6 +12,7 @@ import 'package:package_info/package_info.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sim_plugin/sim_plugin.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_keychain/flutter_keychain.dart';
 
 class JSReport {
   static JSReport? _instance;
@@ -95,31 +97,57 @@ class JSReport {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     _publicData.processID = _getUUID();
     _publicData.sessionID = _getUUID();
-    if (Platform.isAndroid) {
-      _publicData.androidID = await _androidIdPlugin.getId();
-    } else if (Platform.isIOS) {
-      _publicData.IDFV = (await deviceInfo.iosInfo).identifierForVendor;
-    }
+
     PackageInfo packageInfo = await PackageInfo.fromPlatform();
     _publicData.appName = packageInfo.appName;
     _publicData.packageName = packageInfo.packageName;
     _publicData.clientVersion = packageInfo.version;
     if (Platform.isAndroid) {
+      String? androidId =
+          await _getValueFromKeychain(_ReportJsonKey.androidID.name);
+      if (androidId != null) {
+        _publicData.androidID = androidId;
+      } else {
+        _publicData.androidID = await _androidIdPlugin.getId();
+        if (_publicData.androidID == null &&
+            _publicData.androidID!.isNotEmpty) {
+          _setValueToKeychain(
+              _ReportJsonKey.androidID.name, _publicData.androidID!);
+        }
+      }
       _publicData.systemType = "Android";
       _publicData.systemVersion =
           (await deviceInfo.androidInfo).version.release;
       _publicData.systemDeviceType = (await deviceInfo.androidInfo).model;
       _publicData.isEmulator = !(await deviceInfo.androidInfo).isPhysicalDevice;
     } else if (Platform.isIOS) {
+      String? IDFV = await _getValueFromKeychain(_ReportJsonKey.IDFV.name);
+      if (IDFV != null) {
+        _publicData.IDFV = IDFV;
+      } else {
+        _publicData.IDFV = (await deviceInfo.iosInfo).identifierForVendor;
+        if (_publicData.IDFV == null && _publicData.IDFV!.isNotEmpty) {
+          _setValueToKeychain(_ReportJsonKey.IDFV.name, _publicData.IDFV!);
+        }
+      }
+      String? IDFA = await _getValueFromKeychain(_ReportJsonKey.IDFA.name);
+      if (IDFA != null) {
+        _publicData.IDFA = IDFA;
+      } else {
+        _publicData.IDFA = await AdvertisingId.id(true);
+        if (_publicData.IDFA == null && _publicData.IDFA!.isNotEmpty) {
+          _setValueToKeychain(_ReportJsonKey.IDFA.name, _publicData.IDFA!);
+        }
+      }
       _publicData.systemType = "iOS";
       _publicData.systemVersion = (await deviceInfo.iosInfo).systemVersion;
       _publicData.systemDeviceType = (await deviceInfo.iosInfo).model;
       _publicData.isEmulator = !(await deviceInfo.iosInfo).isPhysicalDevice;
-      _publicData.IDFA = await AdvertisingId.id(true);
     }
     NetworkStatus networkStatus =
         await ConnectionNetworkType().currentNetworkStatus();
     _publicData.network = _getNetworkStatusName(networkStatus);
+    _checkVPN();
     _getTelecomOper();
   }
 
@@ -149,6 +177,23 @@ class JSReport {
     _appLifecycleListener = AppLifecycleListener(
       onHide: _onHide,
     );
+
+    Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> results) {
+      bool isFindVpn = false;
+      for (ConnectivityResult result in results) {
+        if (result == ConnectivityResult.vpn) {
+          isFindVpn = true;
+          break;
+        }
+      }
+      if (isFindVpn) {
+        _publicData.proxy = 1;
+      } else {
+        _publicData.proxy = 0;
+      }
+    });
   }
 
   /// 进入后台回调
@@ -183,7 +228,7 @@ class JSReport {
 
   /// 上报事件
   /// [reportData] 上报数据
-  logEvent(Map<String, dynamic> reportData) async {
+  logEvent(Map<String, dynamic> reportData, {DateTime? reportTime}) async {
     Map<String, dynamic> reportMap = _publicData.toJson();
     reportData.forEach((key, value) {
       reportMap[key] = value;
@@ -191,14 +236,14 @@ class JSReport {
     _userProperty.forEach((key, value) {
       reportMap[key] = value;
     });
-    DateTime dateTime = DateTime.now();
+    reportTime ??= DateTime.now();
     DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm:ss');
-    String formatted = formatter.format(dateTime);
-    reportMap[_ReportJsonKey.eventID.name] =  _getUUID();
+    String formatted = formatter.format(reportTime!);
+    reportMap[_ReportJsonKey.eventID.name] = _getUUID();
     reportMap[_ReportJsonKey.eventTime.name] = formatted;
     reportMap[_ReportJsonKey.eventTimeStamp.name] =
-        dateTime.millisecondsSinceEpoch;
-    reportMap[_ReportJsonKey.timeZone.name] = dateTime.timeZoneName;
+        reportTime!.millisecondsSinceEpoch;
+    reportMap[_ReportJsonKey.timeZone.name] = reportTime!.timeZoneName;
     LogProducerResult code = await _aliyunLogSdk!.addLog(reportMap);
     if (_isDebug) {
       print('aliyun log add log data: ${reportMap.toString()}');
@@ -226,50 +271,108 @@ class JSReport {
         return "other";
     }
   }
+
+  _checkVPN() async {
+    var results = await Connectivity().checkConnectivity();
+    bool isFindVpn = false;
+    for (ConnectivityResult result in results) {
+      if (result == ConnectivityResult.vpn) {
+        isFindVpn = true;
+        break;
+      }
+    }
+    if (isFindVpn) {
+      _publicData.proxy = 1;
+    } else {
+      _publicData.proxy = 0;
+    }
+  }
+
+  Future<String?> _getValueFromKeychain(String key) async {
+    try {
+      return await FlutterKeychain.get(key: key);
+    } catch (e) {
+      if (_isDebug) {
+        debugPrint(e.toString());
+      }
+    }
+    return null;
+  }
+
+  _setValueToKeychain(String key, String value) async {
+    try {
+      await FlutterKeychain.put(key: key, value: value);
+    } catch (e) {
+      if (_isDebug) {
+        debugPrint(e.toString());
+      }
+    }
+  }
 }
 
 class _ReportPublicData {
   /// 用户ID
   String? userID;
+
   /// 进程ID
   String? processID;
+
   /// AndroidID
   String? androidID;
+
   /// 会话ID，一次完成的前台生命周期
   String? sessionID;
+
   /// iOS 广告ID
   String? IDFA;
+
   /// iOS 设备ID
   String? IDFV;
+
   /// FirebaseID
   String? firebaseID;
+
   /// 应用名
   String? appName;
+
   /// 平台ID
   String? platID;
+
   /// 包名
   String? packageName;
+
   /// 客户端版本
   String? clientVersion;
+
   /// 运营商
   String? telecomOper;
+
   /// 系统类型
   String? systemType;
+
   /// 系统版本
   String? systemVersion;
+
   /// 系统设备类型
   String? systemDeviceType;
+
   /// 网络类型
   String? network;
   // int? proxy;
   /// 系统语言
   String? systemLang;
+
   /// 是否模拟器
   bool? isEmulator;
+
   /// 设备唯一标识
   String? deviceID;
+
   /// 国家码
   String? countryCode;
+
+  /// 是否开启VPN
+  int proxy = 0;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> map = {};
@@ -293,6 +396,7 @@ class _ReportPublicData {
     map[_ReportJsonKey.isEmulator.name] = isEmulator;
     map[_ReportJsonKey.deviceID.name] = deviceID;
     map[_ReportJsonKey.countryCode.name] = countryCode;
+    map[_ReportJsonKey.proxy.name] = proxy;
     return map;
   }
 }
@@ -322,4 +426,5 @@ enum _ReportJsonKey {
   isEmulator,
   appName,
   systemVersion,
+  proxy
 }
