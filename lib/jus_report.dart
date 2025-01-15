@@ -126,7 +126,7 @@ class JSReport {
         _publicData.IDFV = IDFV;
       } else {
         _publicData.IDFV = (await deviceInfo.iosInfo).identifierForVendor;
-        if (_publicData.IDFV == null && _publicData.IDFV!.isNotEmpty) {
+        if (_publicData.IDFV != null && _publicData.IDFV!.isNotEmpty) {
           _setValueToKeychain(_ReportJsonKey.IDFV.name, _publicData.IDFV!);
         }
       }
@@ -135,7 +135,7 @@ class JSReport {
         _publicData.IDFA = IDFA;
       } else {
         _publicData.IDFA = await AdvertisingId.id(true);
-        if (_publicData.IDFA == null && _publicData.IDFA!.isNotEmpty) {
+        if (_publicData.IDFA != null && _publicData.IDFA!.isNotEmpty) {
           _setValueToKeychain(_ReportJsonKey.IDFA.name, _publicData.IDFA!);
         }
       }
