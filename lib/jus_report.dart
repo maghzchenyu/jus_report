@@ -227,7 +227,9 @@ class JSReport {
   }
 
   /// 上报事件
+  /// [eventName] 事件名称
   /// [reportData] 上报数据
+  /// [reportTime] 上报时间(可空，使用内部当前时间)
   logEvent(String eventName, Map<String, dynamic> reportData, {DateTime? reportTime}) async {
     Map<String, dynamic> reportMap = _publicData.toJson();
     reportData.forEach((key, value) {
