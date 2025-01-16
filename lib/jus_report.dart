@@ -109,7 +109,7 @@ class JSReport {
         _publicData.androidID = androidId;
       } else {
         _publicData.androidID = await _androidIdPlugin.getId();
-        if (_publicData.androidID == null &&
+        if (_publicData.androidID != null &&
             _publicData.androidID!.isNotEmpty) {
           _setValueToKeychain(
               _ReportJsonKey.androidID.name, _publicData.androidID!);
@@ -228,7 +228,7 @@ class JSReport {
 
   /// 上报事件
   /// [reportData] 上报数据
-  logEvent(Map<String, dynamic> reportData, {DateTime? reportTime}) async {
+  logEvent(String eventName, Map<String, dynamic> reportData, {DateTime? reportTime}) async {
     Map<String, dynamic> reportMap = _publicData.toJson();
     reportData.forEach((key, value) {
       reportMap[key] = value;
@@ -244,6 +244,7 @@ class JSReport {
     reportMap[_ReportJsonKey.eventTimeStamp.name] =
         reportTime!.millisecondsSinceEpoch;
     reportMap[_ReportJsonKey.timeZone.name] = reportTime!.timeZoneName;
+    reportMap[_ReportJsonKey.eventName.name] = eventName;
     LogProducerResult code = await _aliyunLogSdk!.addLog(reportMap);
     if (_isDebug) {
       print('aliyun log add log data: ${reportMap.toString()}');
@@ -402,6 +403,7 @@ class _ReportPublicData {
 }
 
 enum _ReportJsonKey {
+  eventName,
   eventID,
   systemDeviceType,
   processID,
