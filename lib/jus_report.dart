@@ -71,7 +71,7 @@ class JSReport {
 
   /// 设置用户全局属性
   /// [properties] 属性集合
-  serUserProperties(Map<String, dynamic> properties) {
+  setUserProperties(Map<String, dynamic> properties) {
     _userProperty.addAll(properties);
   }
 
